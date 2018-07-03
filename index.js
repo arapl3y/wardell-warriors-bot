@@ -53,13 +53,17 @@ app.get('/', (req, res) => {
 })
 
 app.get('/webhook', (req, res) => {
-  if (
-    req.param('hub.mode') === 'subscribe' &&
-    req.param('hub.verify_token') === VERIFY_TOKEN
-  ) {
-    res.send(req.param('hub.challenge'));
-  } else {
-    res.sendStatus(400);
+  const mode = req.query['hub.mode'];
+  const token = req.query['hub.verify_token'];
+  const challenge = req.query['hub.challenge'];
+
+  if (mode && token) {
+    if (mode === 'subscribe' && token === VERIFY_TOKEN) {
+      console.log('WEBHOOK_VERIFIED');
+      res.status(200).send(challenge);
+    } else {
+      res.sendStatus(403);
+    }
   }
 })
 
