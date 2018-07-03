@@ -3,6 +3,7 @@ const bodyParser = require('body-parser');
 const request = require('request');
 require('dotenv').config()
 const PAGE_ACCESS_TOKEN = process.env.PAGE_ACCESS_TOKEN;
+const VERIFY_TOKEN = process.env.VERIFY_TOKEN;
 
 app = express().use(bodyParser.json());
 
@@ -30,6 +31,8 @@ function callSendAPI(senderPsid, response) {
     "message": response
   }
 
+  console.log(requestBody);
+
   request({
     "uri": "https://graph.facebook.com/v2.6/me/messages",
     "qs": { "access_token": PAGE_ACCESS_TOKEN },
@@ -44,20 +47,19 @@ function callSendAPI(senderPsid, response) {
   })
 }
 
+app.get('/', (req, res) => { 
+  console.log(req);
+  res.status(200).json({ message: 'ok' });
+})
+
 app.get('/webhook', (req, res) => {
-  const VERIFY_TOKEN = process.env.VERIFY_TOKEN;
-
-  const mode = req.query['hub.mode'];
-  const token = req.query['hub.verify_token'];
-  const challenge = req.query['hub.challenge'];
-
-  if (mode && token) {
-    if (mode === 'subscribe' && token === VERIFY_TOKEN) {
-      console.log('WEBHOOK_VERIFIED');
-      res.status(200).send(challenge);
-    } else {
-      res.sendStatus(403);
-    }
+  if (
+    req.param('hub.mode') === 'subscribe' &&
+    req.param('hub.verify_token') === VERIFY_TOKEN
+  ) {
+    res.send(req.param('hub.challenge'));
+  } else {
+    res.sendStatus(400);
   }
 })
 
