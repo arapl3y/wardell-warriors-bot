@@ -2,10 +2,47 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const request = require('request');
 require('dotenv').config()
-const handleMessage = require('./handlers').handleMessage;
-const handlePostback = require('./handlers').handlePostback;
+const PAGE_ACCESS_TOKEN = process.env.PAGE_ACCESS_TOKEN;
 
 app = express().use(bodyParser.json());
+
+function handleMessage(senderPsid, receivedMessage) {
+  let response;
+
+  if (receivedMessage.text) {
+    response = {
+      "text": `You sent the message: "${receivedMessage.text}".`
+    }
+  }
+
+  callSendAPI(senderPsid, response);
+}
+
+// function handlePostback(senderPsid, receivedPostback) {
+
+// }
+
+function callSendAPI(senderPsid, response) {
+  let requestBody = {
+    "recipient": {
+      "id": senderPsid
+    },
+    "message": response
+  }
+
+  request({
+    "uri": "https://graph.facebook.com/v2.6/me/messages",
+    "qs": { "access_token": PAGE_ACCESS_TOKEN },
+    "method": "POST",
+    "json": requestBody
+  }, (err, res, body) => {
+    if (!err) {
+      console.log('message sent!')
+    } else {
+      console.error('Unable to send message: ' + err);
+    }
+  })
+}
 
 app.get('/webhook', (req, res) => {
   const VERIFY_TOKEN = process.env.VERIFY_TOKEN;
