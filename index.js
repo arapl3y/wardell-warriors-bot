@@ -2,14 +2,16 @@ const express = require('express');
 const bodyParser = require('body-parser');
 require('dotenv').config()
 
+const PAGE_ACCESS_TOKEN = process.env.PAGE_ACCESS_TOKEN;
+
 app = express().use(bodyParser.json());
 
 app.get('/webhook', (req, res) => {
-  let VERIFY_TOKEN = process.env.VERIFY_TOKEN;
+  const VERIFY_TOKEN = process.env.VERIFY_TOKEN;
 
-  let mode = req.query['hub.mode'];
-  let token = req.query['hub.verify_token'];
-  let challenge = req.query['hub.challenge'];
+  const mode = req.query['hub.mode'];
+  const token = req.query['hub.verify_token'];
+  const challenge = req.query['hub.challenge'];
 
   if (mode && token) {
     if (mode === 'subscribe' && token === VERIFY_TOKEN) {
@@ -26,8 +28,10 @@ app.post('/webhook', (req, res) => {
 
   if (body.object === 'page') {
     body.entry.forEach(function(entry) {
-      let webhook_event = entry.messaging[0];
-      console.log(webhook_event);
+      let webhookEvent = entry.messaging[0];
+      console.log(webhookEvent);
+
+      let senderPsid = webhookEvent.sender.id;
     });
     res.status(200).send('EVENT_RECEIVED');
   } else {
