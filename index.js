@@ -31,8 +31,6 @@ function callSendAPI(senderPsid, response) {
     "message": response
   }
 
-  console.log(requestBody);
-
   request({
     "uri": "https://graph.facebook.com/v2.6/me/messages",
     "qs": { "access_token": PAGE_ACCESS_TOKEN },
@@ -48,7 +46,6 @@ function callSendAPI(senderPsid, response) {
 }
 
 app.get('/', (req, res) => { 
-  console.log(req);
   res.status(200).json({ message: 'ok' });
 })
 
@@ -73,10 +70,8 @@ app.post('/webhook', (req, res) => {
   if (body.object === 'page') {
     body.entry.forEach(function(entry) {
       let webhookEvent = entry.messaging[0];
-      console.log(webhookEvent);
 
       let senderPsid = webhookEvent.sender.id;
-      console.log('Sender PSID: ' + senderPsid );
 
       if (webhookEvent.message) {
         handleMessage(senderPsid, webhookEvent.message);
