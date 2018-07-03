@@ -45,20 +45,23 @@ function callSendAPI(senderPsid, response) {
 }
 
 app.get('/webhook', (req, res) => {
-  const VERIFY_TOKEN = process.env.VERIFY_TOKEN;
+  console.log('get request')
+  res.status(200).json({ message: 'Welcome to the Wardell Warriors Bot' });
 
-  const mode = req.query['hub.mode'];
-  const token = req.query['hub.verify_token'];
-  const challenge = req.query['hub.challenge'];
+  // const VERIFY_TOKEN = process.env.VERIFY_TOKEN;
 
-  if (mode && token) {
-    if (mode === 'subscribe' && token === VERIFY_TOKEN) {
-      console.log('WEBHOOK_VERIFIED');
-      res.status(200).send(challenge);
-    } else {
-      res.sendStatus(403);
-    }
-  }
+  // const mode = req.query['hub.mode'];
+  // const token = req.query['hub.verify_token'];
+  // const challenge = req.query['hub.challenge'];
+
+  // if (mode && token) {
+  //   if (mode === 'subscribe' && token === VERIFY_TOKEN) {
+  //     console.log('WEBHOOK_VERIFIED');
+  //     res.status(200).send(challenge);
+  //   } else {
+  //     res.sendStatus(403);
+  //   }
+  // }
 })
 
 app.post('/webhook', (req, res) => {
