@@ -1,9 +1,16 @@
 const express = require('express');
 const bodyParser = require('body-parser');
+const morgan = require('morgan');
 require('dotenv').config()
+
+
 const { getWebhook, postWebhook } = require('./controllers/webhooksController.js');
 
 app = express().use(bodyParser.json());
+
+app.use(morgan("dev"));
+
+app.use(express.static("static"));
 
 app.get('/', (req, res) => { 
   res.status(200).json({ message: 'ok' });
