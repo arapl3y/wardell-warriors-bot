@@ -1,5 +1,8 @@
 const request = require('request');
 const PAGE_ACCESS_TOKEN = process.env.PAGE_ACCESS_TOKEN;
+const isThisWeek = require('date-fns/is_this_week');
+const isFuture = require('date-fns/is_future');
+const format = require('date-fns/format');
 
 
 function callSendAPI(senderPsid, response) {
@@ -24,22 +27,22 @@ function callSendAPI(senderPsid, response) {
   })
 };
 
-function handleMessage(senderPsid, receivedMessage) {
+function handleMessage(name, time, senderPsid) {
   let response;
 
-  if (receivedMessage.text) {
+  if (name && time) {
     response = {
-      "text": `You sent the message: "${receivedMessage.text}".`
+      "text": `Next game: ${name}, is at ${time}.`
     }
   }
 
   callSendAPI(senderPsid, response);
 };
 
-function getGameRounds() {
+function getGameRounds(senderPsid, receivedMessage) {
   let requestBody = {
     "team": "5164",
-    "season": "16"
+    "season": "106"
   };
 
   const headers = {
@@ -63,33 +66,24 @@ function getGameRounds() {
   }, (err, res, body) => {
     if (!err) {
       const rounds = Object.values(body.data.rounds);
-      return rounds;
+      getNextGameTime(rounds, senderPsid, receivedMessage);
     } else {
-      console.log('fail')
+      throw Error(err);
     }
   })
 };
 
-function getNextGameTime() {
-  const tomorrow = new Date();
-  tomorrow.setDate(tomorrow.getDate() + 1);
+function getNextGameTime(rounds, senderPsid, receivedMessage) {
+  rounds.forEach(round => {  
+    let roundTime = new Date(round.timestamp * 1000);
 
-  tomorrow.setHours(0, 0, 0, 0);
-
-  rounds.forEach(round => {
-    const compareRoundTime = new Date(round.timestamp * 1000);
-
-    const roundTime = compareRoundTime.toLocaleTimeString();
-
-    compareRoundTime.setHours(0, 0, 0, 0);
-
-    if (+compareRoundTime === +tomorrow) {
-      // send message
-      // the next game is ${round.matches[0].name} at ${roundTime}
+    if (isThisWeek(roundTime) && isFuture(roundTime)) {
+      roundTime = format(roundTime, 'h:mma')
+      handleMessage(round.matches[0].name, roundTime, senderPsid, receivedMessage);
     }
   })
 };
 
 
 
-module.exports.handleMessage = handleMessage;
+module.exports.getGameRounds = getGameRounds;

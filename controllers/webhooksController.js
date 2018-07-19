@@ -1,5 +1,5 @@
 const VERIFY_TOKEN = process.env.VERIFY_TOKEN;
-const { handleMessage } = require('../handlers/handlers.js');
+const { getGameRounds } = require('../handlers/handlers.js');
 
 function getWebhook(req, res) {
   const mode = req.query['hub.mode'];
@@ -26,10 +26,9 @@ function postWebhook(req, res) {
       let senderPsid = webhookEvent.sender.id;
 
       if (webhookEvent.message) {
-        handleMessage(senderPsid, webhookEvent.message);
+        getGameRounds(senderPsid, webhookEvent.message);
       } else if (webhookEvent.postback) {
-        console.log('postback received');
-        // handlePostback(senderPsid, webhookEvent.postback);
+        console.log('No postback response currently set up');
       }
     });
     res.status(200).send('EVENT_RECEIVED');
